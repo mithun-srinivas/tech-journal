@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
 import { Code2, Sparkles } from 'lucide-react'
 import './Login.css'
 
 function Login() {
-  const [isSignUp, setIsSignUp] = useState(false)
+  const location = useLocation()
+  const [isSignUp, setIsSignUp] = useState(location.state?.isSignUp || false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -20,6 +21,13 @@ function Login() {
       navigate('/dashboard', { replace: true })
     }
   }, [user, profile, navigate])
+
+  // Set signup mode if coming from navbar
+  useEffect(() => {
+    if (location.state?.isSignUp) {
+      setIsSignUp(true)
+    }
+  }, [location.state])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -142,6 +150,27 @@ function Login() {
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>
           </p>
+        </div>
+
+        <div className="approval-notice">
+          <div className="notice-icon">⏳</div>
+          <div className="notice-content">
+            <h4>Access Requires Approval</h4>
+            <p>
+              Your account will be activated only after admin approval, which can take up to <strong>24 hours</strong> after verifying your membership status.
+            </p>
+            <p className="membership-note">
+              Not a member yet?{' '}
+              <a
+                href="https://community.mithunsrinivas.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="membership-link"
+              >
+                Click here to become a member
+              </a>
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>

@@ -92,9 +92,17 @@ function Landing() {
             <Link to="/login" className="btn btn-secondary">
               Sign In
             </Link>
-            <Link to="/login" className="btn btn-primary">
-              Get Started
+            <Link to="/login" state={{ isSignUp: true }} className="btn btn-secondary">
+              Sign Up
             </Link>
+            <a 
+              href="https://community.mithunsrinivas.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+            >
+              Become a Member
+            </a>
           </div>
         </motion.nav>
 
@@ -114,10 +122,15 @@ function Landing() {
               Join thousands of developers documenting their coding journey.
             </p>
             <div className="hero-buttons">
-              <Link to="/login" className="btn btn-primary btn-large">
+              <a 
+                href="https://community.mithunsrinivas.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary btn-large"
+              >
                 <Zap size={20} />
                 Become a Member
-              </Link>
+              </a>
               <a href="#features" className="btn btn-secondary btn-large">
                 Learn More
               </a>
@@ -226,10 +239,15 @@ function Landing() {
         >
           <h2>Ready to Start Your Journey?</h2>
           <p>Join developers worldwide who are building better habits and growing their careers.</p>
-          <Link to="/login" className="btn btn-primary btn-large">
+          <a 
+            href="https://community.mithunsrinivas.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary btn-large"
+          >
             <Sparkles size={20} />
             Become a Member
-          </Link>
+          </a>
         </motion.div>
       </section>
 

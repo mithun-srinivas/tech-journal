@@ -175,3 +175,59 @@
   color: var(--accent-orange-light);
   text-decoration: underline;
 }
+
+.approval-notice {
+  margin-top: 2rem;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid var(--accent-orange);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex !important;
+  gap: 1rem;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notice-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.notice-content {
+  flex: 1;
+}
+
+.notice-content h4 {
+  font-size: 1rem;
+  color: var(--accent-orange);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.notice-content p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 0.75rem 0;
+}
+
+.notice-content strong {
+  color: var(--accent-orange);
+  font-weight: 600;
+}
+
+.membership-note {
+  margin-bottom: 0 !important;
+}
+
+.membership-link {
+  color: var(--accent-orange);
+  text-decoration: underline;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.membership-link:hover {
+  color: var(--accent-orange-light);
+}
