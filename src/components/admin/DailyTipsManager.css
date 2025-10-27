@@ -1,0 +1,138 @@
+.daily-tips-manager {
+  width: 100%;
+}
+
+.tips-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tips-header h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.tips-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tip-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.tip-item:hover {
+  border-color: var(--accent-orange);
+  transform: translateX(4px);
+}
+
+.tip-main {
+  flex: 1;
+}
+
+.tip-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.tip-item h4 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.status-indicator.published {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--success);
+}
+
+.status-indicator.draft {
+  background: rgba(156, 163, 175, 0.1);
+  color: var(--text-tertiary);
+}
+
+.tip-content-preview {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.tip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tip-date {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+.tip-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent-orange);
+}
+
+@media (max-width: 768px) {
+  .tip-item {
+    flex-direction: column;
+  }
+
+  .tip-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .tip-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+

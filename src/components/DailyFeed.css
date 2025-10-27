@@ -1,0 +1,128 @@
+.daily-feed {
+  width: 100%;
+}
+
+.feed-header {
+  margin-bottom: 2rem;
+}
+
+.feed-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.feed-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tip-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+  border-color: var(--accent-orange);
+  transform: translateX(4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tip-icon {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  background: var(--accent-orange-glow);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-orange);
+}
+
+.tip-content {
+  flex: 1;
+}
+
+.tip-content h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.tip-content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.tip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tip-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+}
+
+.tip-author {
+  font-weight: 600;
+  color: var(--accent-orange);
+}
+
+.tip-date {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+  gap: 1rem;
+}
+
+.empty-state svg {
+  color: var(--accent-orange);
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .tip-card {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tip-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
