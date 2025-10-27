@@ -264,11 +264,13 @@ The application will be available at `http://localhost:3000`
 
 To use AI-powered LinkedIn post generation:
 
-1. Get a free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+1. Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. In the app, go to AI Posts tab
 3. Click "Set API Key" and enter your key
 4. The key is stored locally in your browser
 5. Generate posts based on your journal entries
+
+**Note:** Uses Gemini 1.5 Flash for fast, high-quality content generation.
 
 ## 🎨 Design Features
 

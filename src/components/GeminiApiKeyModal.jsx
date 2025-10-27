@@ -59,17 +59,20 @@ function GeminiApiKeyModal({ isOpen, onClose, onSave, currentKey }) {
                 <ol>
                   <li>Visit Google AI Studio</li>
                   <li>Sign in with your Google account</li>
-                  <li>Click "Get API Key"</li>
+                  <li>Click "Get API Key" or "Create API Key"</li>
                   <li>Copy and paste it below</li>
                 </ol>
                 <a
-                  href="https://makersuite.google.com/app/apikey"
+                  href="https://aistudio.google.com/app/apikey"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="external-link"
                 >
                   Get API Key <ExternalLink size={14} />
                 </a>
+                <p style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-tertiary)' }}>
+                  Using Gemini 1.5 Flash model for fast, quality generation
+                </p>
               </div>
 
               <div className="input-group">

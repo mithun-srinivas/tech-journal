@@ -34,18 +34,19 @@ function AILinkedInPost({ geminiApiKey, onRequestApiKey }) {
         .map(entry => `${entry.title}: ${entry.content}`)
         .join('\n\n')
 
-      // Call Gemini API
+      // Call Gemini API (using gemini-1.5-flash model)
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-goog-api-key': geminiApiKey,
           },
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Based on the following developer journal entries, create an engaging LinkedIn post that highlights achievements, learnings, and progress. Keep it professional, concise (max 300 words), and inspiring. Include relevant hashtags.\n\nJournal Entries:\n${context}\n\nLinkedIn Post:`
+                text: `Based on the following developer journal entries, create an engaging LinkedIn post that highlights achievements, learnings, and progress. Format as linkedin post, don't return markdown. Strictly return only the post content. Keep it professional, concise (max 300 words), and inspiring. Include relevant hashtags.\n\nJournal Entries:\n${context}\n\nLinkedIn Post:`
               }]
             }]
           })
@@ -53,7 +54,9 @@ function AILinkedInPost({ geminiApiKey, onRequestApiKey }) {
       )
 
       if (!response.ok) {
-        throw new Error('Failed to generate post')
+        const errorData = await response.json()
+        console.error('Gemini API Error:', errorData)
+        throw new Error(errorData.error?.message || 'Failed to generate post')
       }
 
       const data = await response.json()
@@ -67,7 +70,7 @@ function AILinkedInPost({ geminiApiKey, onRequestApiKey }) {
       }
     } catch (error) {
       console.error('Error generating post:', error)
-      toast.error('Failed to generate post. Check your API key.')
+      toast.error('Failed to generate post: ' + (error.message || 'Check your API key'))
     } finally {
       setLoading(false)
     }
