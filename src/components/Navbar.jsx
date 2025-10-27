@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
-import { Code2, LogOut, Settings, Shield } from 'lucide-react'
+import { Code2, LogOut, Settings, Shield, Users } from 'lucide-react'
 import './Navbar.css'
 
 function Navbar({ isAdmin = false }) {
@@ -39,6 +39,16 @@ function Navbar({ isAdmin = false }) {
         </Link>
 
         <div className="navbar-actions">
+          <a 
+            href="https://urbuddy.oscode.co.in/buddy/mithun_s"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary call-btn"
+          >
+            <Users size={18} />
+            <span className="call-text">1:1 Call with Mithun</span>
+          </a>
+
           <div className="user-info">
             <div className="user-avatar">
               {profile?.username?.charAt(0).toUpperCase() || 'U'}

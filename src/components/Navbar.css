@@ -47,6 +47,18 @@
   gap: 1rem;
 }
 
+.call-btn {
+  background: var(--accent-orange-glow) !important;
+  border-color: var(--accent-orange) !important;
+  color: var(--accent-orange) !important;
+  font-weight: 600;
+}
+
+.call-btn:hover {
+  background: var(--accent-orange) !important;
+  color: white !important;
+}
+
 .user-info {
   display: flex;
   align-items: center;
@@ -114,6 +126,14 @@
 
   .btn span {
     display: none;
+  }
+
+  .call-text {
+    display: none;
+  }
+
+  .call-btn {
+    padding: 0.5rem;
   }
 }
 
