@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { createTip, updateTip, deleteTip } from '../../store/slices/tipsSlice'
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -9,7 +10,8 @@ import './DailyTipsManager.css'
 
 function DailyTipsManager() {
   const { user, profile } = useAuth()
-  const [tips, setTips] = useState([])
+  const dispatch = useDispatch()
+  const tips = useSelector(state => state.tips.allTips)
   const [showModal, setShowModal] = useState(false)
   const [editingTip, setEditingTip] = useState(null)
   const [formData, setFormData] = useState({
@@ -18,24 +20,6 @@ function DailyTipsManager() {
     tags: '',
     published: true
   })
-
-  useEffect(() => {
-    fetchTips()
-  }, [])
-
-  const fetchTips = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('daily_tips')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setTips(data || [])
-    } catch (error) {
-      console.error('Error fetching tips:', error)
-    }
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -60,26 +44,20 @@ function DailyTipsManager() {
       }
 
       if (editingTip) {
-        const { error } = await supabase
-          .from('daily_tips')
-          .update(tipData)
-          .eq('id', editingTip.id)
-
-        if (error) throw error
+        await dispatch(updateTip({
+          id: editingTip.id,
+          ...tipData
+        })).unwrap()
+        
         toast.success('Tip updated!')
       } else {
-        const { error } = await supabase
-          .from('daily_tips')
-          .insert([tipData])
-
-        if (error) throw error
+        await dispatch(createTip(tipData)).unwrap()
         toast.success('Tip created!')
       }
 
-      fetchTips()
       handleCloseModal()
     } catch (error) {
-      toast.error('Error saving tip: ' + error.message)
+      toast.error('Error saving tip: ' + error)
     }
   }
 
@@ -87,31 +65,26 @@ function DailyTipsManager() {
     if (!confirm('Are you sure you want to delete this tip?')) return
 
     try {
-      const { error } = await supabase
-        .from('daily_tips')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
+      await dispatch(deleteTip(id)).unwrap()
       toast.success('Tip deleted')
-      fetchTips()
     } catch (error) {
-      toast.error('Error deleting tip')
+      toast.error('Error deleting tip: ' + error)
     }
   }
 
   const handleTogglePublish = async (id, currentStatus) => {
     try {
-      const { error } = await supabase
-        .from('daily_tips')
-        .update({ published: !currentStatus })
-        .eq('id', id)
-
-      if (error) throw error
+      const tip = tips.find(t => t.id === id)
+      if (!tip) return
+      
+      await dispatch(updateTip({
+        id,
+        published: !currentStatus
+      })).unwrap()
+      
       toast.success(currentStatus ? 'Tip unpublished' : 'Tip published')
-      fetchTips()
     } catch (error) {
-      toast.error('Error updating tip')
+      toast.error('Error updating tip: ' + error)
     }
   }
 

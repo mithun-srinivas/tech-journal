@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { createJournalEntry, updateJournalEntry, deleteJournalEntry } from '../store/slices/journalSlice'
 import { Calendar, Save, Edit, Trash2, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -9,7 +10,8 @@ import './JournalEntry.css'
 
 function JournalEntry() {
   const { user, profile } = useAuth()
-  const [entries, setEntries] = useState([])
+  const dispatch = useDispatch()
+  const entries = useSelector(state => state.journal.entries)
   const [todayEntry, setTodayEntry] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [content, setContent] = useState('')
@@ -18,56 +20,29 @@ function JournalEntry() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Only fetch when we have both user and profile (authentication is complete)
-    if (user && profile) {
-      fetchEntries()
+    // Check for today's entry from Redux store
+    if (entries.length > 0) {
       checkTodayEntry()
     }
-  }, [user, profile])
+  }, [entries])
 
-  const fetchEntries = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10)
+  const checkTodayEntry = () => {
+    const today = new Date()
+    const todayStr = format(today, 'yyyy-MM-dd')
+    
+    // Find today's entry from Redux store
+    const todaysEntry = entries.find(entry => {
+      const entryDate = new Date(entry.created_at)
+      const entryStr = format(entryDate, 'yyyy-MM-dd')
+      return entryStr === todayStr
+    })
 
-      if (error) throw error
-      setEntries(data || [])
-    } catch (error) {
-      console.error('Error fetching entries:', error)
-    }
-  }
-
-  const checkTodayEntry = async () => {
-    try {
-      const today = new Date().toISOString().split('T')[0]
-      const { data, error } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('created_at', today)
-        .maybeSingle()  // Use maybeSingle() instead of single() to handle 0 results gracefully
-
-      if (error) {
-        console.error('Error checking today entry:', error)
-        setTodayEntry(null)
-        return
-      }
-
-      if (data) {
-        setTodayEntry(data)
-        setTitle(data.title)
-        setContent(data.content)
-        setTags(data.tags?.join(', ') || '')
-      } else {
-        // No entry for today
-        setTodayEntry(null)
-      }
-    } catch (error) {
-      console.error('Error in checkTodayEntry:', error)
+    if (todaysEntry) {
+      setTodayEntry(todaysEntry)
+      setTitle(todaysEntry.title)
+      setContent(todaysEntry.content)
+      setTags(todaysEntry.tags?.join(', ') || '')
+    } else {
       setTodayEntry(null)
     }
   }
@@ -84,38 +59,29 @@ function JournalEntry() {
       
       if (todayEntry) {
         // Update existing entry
-        const { error } = await supabase
-          .from('journal_entries')
-          .update({
-            title,
-            content,
-            tags: tagArray,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', todayEntry.id)
-
-        if (error) throw error
+        await dispatch(updateJournalEntry({
+          id: todayEntry.id,
+          title,
+          content,
+          tags: tagArray
+        })).unwrap()
+        
         toast.success('Journal entry updated!')
       } else {
         // Create new entry
-        const { error } = await supabase
-          .from('journal_entries')
-          .insert([{
-            user_id: user.id,
-            title,
-            content,
-            tags: tagArray
-          }])
-
-        if (error) throw error
+        await dispatch(createJournalEntry({
+          userId: user.id,
+          title,
+          content,
+          tags: tagArray
+        })).unwrap()
+        
         toast.success('Journal entry saved!')
       }
 
-      fetchEntries()
-      checkTodayEntry()
       setIsEditing(false)
     } catch (error) {
-      toast.error('Error saving entry: ' + error.message)
+      toast.error('Error saving entry: ' + error)
     } finally {
       setLoading(false)
     }
@@ -125,14 +91,9 @@ function JournalEntry() {
     if (!confirm('Are you sure you want to delete this entry?')) return
 
     try {
-      const { error } = await supabase
-        .from('journal_entries')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
+      await dispatch(deleteJournalEntry(id)).unwrap()
       toast.success('Entry deleted')
-      fetchEntries()
+      
       if (todayEntry?.id === id) {
         setTodayEntry(null)
         setTitle('')
@@ -140,7 +101,7 @@ function JournalEntry() {
         setTags('')
       }
     } catch (error) {
-      toast.error('Error deleting entry')
+      toast.error('Error deleting entry: ' + error)
     }
   }
 
@@ -255,7 +216,7 @@ function JournalEntry() {
               <p>No entries yet. Start journaling today! 📝</p>
             </div>
           ) : (
-            entries.map((entry) => (
+            entries.slice(0, 10).map((entry) => (
               <motion.div
                 key={entry.id}
                 className="entry-card"

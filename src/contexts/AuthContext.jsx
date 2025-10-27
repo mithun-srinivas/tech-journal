@@ -1,5 +1,9 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { store } from '../store'
+import { clearJournal } from '../store/slices/journalSlice'
+import { clearProjects } from '../store/slices/projectsSlice'
+import { clearTips } from '../store/slices/tipsSlice'
 import toast from 'react-hot-toast'
 
 const AuthContext = createContext({})
@@ -300,6 +304,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
+      
+      // Clear Redux store
+      store.dispatch(clearJournal())
+      store.dispatch(clearProjects())
+      store.dispatch(clearTips())
+      
       toast.success('Signed out successfully')
     } catch (error) {
       toast.error(error.message)

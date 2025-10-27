@@ -1,57 +1,44 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { MessageSquare, Sparkles, Calendar } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { fetchDailyTips } from '../store/slices/tipsSlice'
+import { MessageSquare, Sparkles, Calendar, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import './DailyFeed.css'
 
 function DailyFeed() {
-  const [tips, setTips] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { user, profile } = useAuth()
+  const dispatch = useDispatch()
+  const { tips, loading, error } = useSelector(state => state.tips)
 
   useEffect(() => {
-    fetchDailyTips()
-    
-    // Subscribe to new tips
-    const subscription = supabase
-      .channel('daily_tips_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'daily_tips'
-      }, () => {
-        fetchDailyTips()
-      })
-      .subscribe()
+    // Subscribe to new tips for real-time updates
+    if (user && profile) {
+      const subscription = supabase
+        .channel('daily_tips_changes')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'daily_tips'
+        }, () => {
+          console.log('📰 Daily tips updated, refreshing from API...')
+          dispatch(fetchDailyTips())
+        })
+        .subscribe()
 
-    return () => {
-      subscription.unsubscribe()
+      return () => {
+        subscription.unsubscribe()
+      }
     }
-  }, [])
+  }, [user, profile, dispatch])
 
-  const fetchDailyTips = async () => {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('daily_tips')
-        .select(`
-          *,
-          profiles:created_by (username)
-        `)
-        .eq('published', true)
-        .order('created_at', { ascending: false })
-        .limit(20)
-
-      if (error) throw error
-      setTips(data || [])
-    } catch (error) {
-      console.error('Error fetching daily tips:', error)
-    } finally {
-      setLoading(false)
-    }
+  const handleRetry = () => {
+    dispatch(fetchDailyTips())
   }
 
-  if (loading) {
+  if (loading && tips.length === 0) {
     return (
       <div className="daily-feed">
         <div className="feed-header">
@@ -79,13 +66,26 @@ function DailyFeed() {
         <p>Tips and insights from the community</p>
       </div>
 
-      <div className="feed-list">
-        {tips.length === 0 ? (
-          <div className="empty-state">
-            <Sparkles size={48} />
-            <p>No tips yet. Check back soon! ✨</p>
-          </div>
-        ) : (
+      {error && tips.length === 0 ? (
+        <div className="error-state">
+          <AlertCircle size={48} />
+          <h3>Failed to Load Feed</h3>
+          <p>{error}</p>
+          <button 
+            className="btn btn-primary"
+            onClick={handleRetry}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : (
+        <div className="feed-list">
+          {tips.length === 0 ? (
+            <div className="empty-state">
+              <Sparkles size={48} />
+              <p>No tips yet. Check back soon! ✨</p>
+            </div>
+          ) : (
           tips.map((tip, index) => (
             <motion.div
               key={tip.id}
@@ -120,9 +120,10 @@ function DailyFeed() {
                 </div>
               </div>
             </motion.div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }

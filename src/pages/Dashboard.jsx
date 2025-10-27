@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
+import { useDataInit } from '../hooks/useDataInit'
 import Navbar from '../components/Navbar'
 import JournalEntry from '../components/JournalEntry'
 import StreakDisplay from '../components/StreakDisplay'
@@ -19,6 +19,9 @@ function Dashboard() {
   const [shareData, setShareData] = useState(null)
   const [showApiKeyModal, setShowApiKeyModal] = useState(false)
   const [geminiApiKey, setGeminiApiKey] = useState('')
+
+  // Initialize all data from API on login
+  useDataInit()
 
   useEffect(() => {
     // Load Gemini API key from localStorage

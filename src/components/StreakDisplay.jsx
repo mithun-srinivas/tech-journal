@@ -1,24 +1,33 @@
 import { useState, useEffect, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { fetchJournalEntries } from '../store/slices/journalSlice'
 import { Flame, Share2, TrendingUp } from 'lucide-react'
-import { format, differenceInDays, startOfDay } from 'date-fns'
+import { format, differenceInDays } from 'date-fns'
 import html2canvas from 'html2canvas'
 import './StreakDisplay.css'
 
 function StreakDisplay({ onShare }) {
   const { user, profile } = useAuth()
+  const dispatch = useDispatch()
+  const entries = useSelector(state => state.journal.entries)
   const [streak, setStreak] = useState(0)
   const [longestStreak, setLongestStreak] = useState(0)
   const [recentDays, setRecentDays] = useState([])
   const streakRef = useRef(null)
 
   useEffect(() => {
-    if (user && profile) {
+    // Recalculate streak whenever entries change
+    if (entries.length > 0) {
       calculateStreak()
-      
-      // Subscribe to journal entries changes to update streak in real-time
+    }
+  }, [entries])
+
+  useEffect(() => {
+    // Subscribe to journal entries changes for real-time updates
+    if (user && profile) {
       const subscription = supabase
         .channel('journal_entries_changes')
         .on('postgres_changes', {
@@ -27,8 +36,8 @@ function StreakDisplay({ onShare }) {
           table: 'journal_entries',
           filter: `user_id=eq.${user.id}`
         }, () => {
-          console.log('📊 Journal entry changed, recalculating streak...')
-          calculateStreak()
+          console.log('📊 Journal entry changed, refreshing from API...')
+          dispatch(fetchJournalEntries(user.id))
         })
         .subscribe()
 
@@ -36,28 +45,19 @@ function StreakDisplay({ onShare }) {
         subscription.unsubscribe()
       }
     }
-  }, [user, profile])
+  }, [user, profile, dispatch])
 
-  const calculateStreak = async () => {
+  const calculateStreak = () => {
     try {
-      const { data, error } = await supabase
-        .from('journal_entries')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      if (!data || data.length === 0) {
+      if (!entries || entries.length === 0) {
         setStreak(0)
         setLongestStreak(0)
         setRecentDays([])
         return
       }
 
-      // Get unique dates in local timezone (YYYY-MM-DD format)
-      // This ensures we compare dates in the user's timezone, not UTC
-      const uniqueDates = [...new Set(data.map(entry => {
+      // Get unique dates in local timezone (YYYY-MM-DD format) from Redux store
+      const uniqueDates = [...new Set(entries.map(entry => {
         const date = new Date(entry.created_at)
         // Format to YYYY-MM-DD in local timezone
         const year = date.getFullYear()

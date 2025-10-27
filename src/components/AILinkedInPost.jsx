@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Sparkles, Copy, RefreshCw, Settings } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -8,31 +8,12 @@ import './AILinkedInPost.css'
 
 function AILinkedInPost({ geminiApiKey, onRequestApiKey }) {
   const { user, profile } = useAuth()
+  const entries = useSelector(state => state.journal.entries)
   const [loading, setLoading] = useState(false)
   const [generatedPost, setGeneratedPost] = useState('')
-  const [recentEntries, setRecentEntries] = useState([])
-
-  useEffect(() => {
-    if (user && profile) {
-      fetchRecentEntries()
-    }
-  }, [user, profile])
-
-  const fetchRecentEntries = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      if (error) throw error
-      setRecentEntries(data || [])
-    } catch (error) {
-      console.error('Error fetching entries:', error)
-    }
-  }
+  
+  // Get recent 5 entries from Redux store
+  const recentEntries = entries.slice(0, 5)
 
   const generatePost = async () => {
     if (!geminiApiKey) {

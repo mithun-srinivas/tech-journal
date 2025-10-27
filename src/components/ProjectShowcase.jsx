@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { createProject, updateProject, deleteProject } from '../store/slices/projectsSlice'
 import { Plus, Edit, Trash2, ExternalLink, Share2, CheckCircle, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import './ProjectShowcase.css'
 
 function ProjectShowcase({ onShare }) {
   const { user, profile } = useAuth()
-  const [projects, setProjects] = useState([])
+  const dispatch = useDispatch()
+  const projects = useSelector(state => state.projects.projects)
   const [showModal, setShowModal] = useState(false)
   const [editingProject, setEditingProject] = useState(null)
   const [filter, setFilter] = useState('all') // all, in-progress, completed
@@ -21,27 +23,6 @@ function ProjectShowcase({ onShare }) {
     demo_url: '',
     image_url: ''
   })
-
-  useEffect(() => {
-    if (user && profile) {
-      fetchProjects()
-    }
-  }, [user, profile])
-
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setProjects(data || [])
-    } catch (error) {
-      console.error('Error fetching projects:', error)
-    }
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,32 +39,31 @@ function ProjectShowcase({ onShare }) {
         .filter(t => t)
 
       const projectData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         technologies: techArray,
+        status: formData.status,
+        github_url: formData.github_url,
+        demo_url: formData.demo_url,
+        image_url: formData.image_url,
         user_id: user.id
       }
 
       if (editingProject) {
-        const { error } = await supabase
-          .from('projects')
-          .update(projectData)
-          .eq('id', editingProject.id)
-
-        if (error) throw error
+        await dispatch(updateProject({
+          id: editingProject.id,
+          ...projectData
+        })).unwrap()
+        
         toast.success('Project updated!')
       } else {
-        const { error } = await supabase
-          .from('projects')
-          .insert([projectData])
-
-        if (error) throw error
+        await dispatch(createProject(projectData)).unwrap()
         toast.success('Project created!')
       }
 
-      fetchProjects()
       handleCloseModal()
     } catch (error) {
-      toast.error('Error saving project: ' + error.message)
+      toast.error('Error saving project: ' + error)
     }
   }
 
@@ -91,16 +71,10 @@ function ProjectShowcase({ onShare }) {
     if (!confirm('Are you sure you want to delete this project?')) return
 
     try {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
+      await dispatch(deleteProject(id)).unwrap()
       toast.success('Project deleted')
-      fetchProjects()
     } catch (error) {
-      toast.error('Error deleting project')
+      toast.error('Error deleting project: ' + error)
     }
   }
 

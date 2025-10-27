@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import { useDataInit } from '../hooks/useDataInit'
 import Navbar from '../components/Navbar'
 import UserManagement from '../components/admin/UserManagement'
 import Analytics from '../components/admin/Analytics'
@@ -17,6 +18,9 @@ function AdminDashboard() {
     totalProjects: 0,
     pendingApprovals: 0,
   })
+
+  // Initialize all data from API on login
+  useDataInit()
 
   useEffect(() => {
     fetchStats()
