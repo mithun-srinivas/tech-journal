@@ -92,17 +92,9 @@ function Landing() {
             <Link to="/login" className="btn btn-secondary">
               Sign In
             </Link>
-            <Link to="/login" state={{ isSignUp: true }} className="btn btn-secondary">
+            <Link to="/login" state={{ isSignUp: true }} className="btn btn-primary">
               Sign Up
             </Link>
-            <a 
-              href="https://community.mithunsrinivas.in/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary"
-            >
-              Become a Member
-            </a>
           </div>
         </motion.nav>
 
