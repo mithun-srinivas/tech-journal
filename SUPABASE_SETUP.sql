@@ -76,6 +76,24 @@ CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE 
   USING (auth.uid() = id);
 
+CREATE POLICY "Admins can update any profile" 
+  ON profiles FOR UPDATE 
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can delete profiles" 
+  ON profiles FOR DELETE 
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
 -- Journal entries policies
 CREATE POLICY "Users can view own journal entries" 
   ON journal_entries FOR SELECT 

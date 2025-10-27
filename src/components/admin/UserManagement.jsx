@@ -35,17 +35,37 @@ function UserManagement({ onUpdate }) {
 
   const handleApprove = async (userId) => {
     try {
-      const { error } = await supabase
+      console.log('✅ Approving user:', userId)
+      
+      const { data, error } = await supabase
         .from('profiles')
         .update({ approved: true })
         .eq('id', userId)
+        .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Approval error:', error)
+        throw error
+      }
+      
+      console.log('✅ Approval successful:', data)
+      
+      // Update local state immediately for instant feedback
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.id === userId ? { ...user, approved: true } : user
+        )
+      )
+      
       toast.success('User approved!')
-      fetchUsers()
-      onUpdate()
+      
+      // Refresh stats in background
+      if (onUpdate) onUpdate()
     } catch (error) {
-      toast.error('Failed to approve user')
+      console.error('❌ Failed to approve user:', error)
+      toast.error('Failed to approve user: ' + (error.message || error))
+      // Refresh to show correct state
+      fetchUsers()
     }
   }
 
@@ -53,33 +73,64 @@ function UserManagement({ onUpdate }) {
     if (!confirm('Are you sure you want to reject this user?')) return
 
     try {
+      console.log('❌ Rejecting user:', userId)
+      
       const { error } = await supabase
         .from('profiles')
         .delete()
         .eq('id', userId)
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Rejection error:', error)
+        throw error
+      }
+      
+      console.log('✅ User rejected successfully')
+      
+      // Update local state immediately
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== userId))
+      
       toast.success('User rejected')
-      fetchUsers()
-      onUpdate()
+      
+      // Refresh stats in background
+      if (onUpdate) onUpdate()
     } catch (error) {
-      toast.error('Failed to reject user')
+      console.error('❌ Failed to reject user:', error)
+      toast.error('Failed to reject user: ' + (error.message || error))
+      fetchUsers()
     }
   }
 
   const handleToggleAdmin = async (userId, currentRole) => {
     try {
       const newRole = currentRole === 'admin' ? 'user' : 'admin'
-      const { error } = await supabase
+      console.log('🔄 Toggling role for user:', userId, 'from', currentRole, 'to', newRole)
+      
+      const { data, error } = await supabase
         .from('profiles')
         .update({ role: newRole })
         .eq('id', userId)
+        .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Role update error:', error)
+        throw error
+      }
+      
+      console.log('✅ Role updated successfully:', data)
+      
+      // Update local state immediately
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.id === userId ? { ...user, role: newRole } : user
+        )
+      )
+      
       toast.success(`User role updated to ${newRole}`)
-      fetchUsers()
     } catch (error) {
-      toast.error('Failed to update user role')
+      console.error('❌ Failed to update user role:', error)
+      toast.error('Failed to update user role: ' + (error.message || error))
+      fetchUsers()
     }
   }
 
