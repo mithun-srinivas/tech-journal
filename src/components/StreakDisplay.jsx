@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Flame, Share2, TrendingUp } from 'lucide-react'
 import { format, differenceInDays, startOfDay } from 'date-fns'
+import html2canvas from 'html2canvas'
 import './StreakDisplay.css'
 
 function StreakDisplay({ onShare }) {
@@ -11,6 +12,7 @@ function StreakDisplay({ onShare }) {
   const [streak, setStreak] = useState(0)
   const [longestStreak, setLongestStreak] = useState(0)
   const [recentDays, setRecentDays] = useState([])
+  const streakRef = useRef(null)
 
   useEffect(() => {
     if (user && profile) {
@@ -142,15 +144,34 @@ function StreakDisplay({ onShare }) {
     }
   }
 
-  const handleShare = () => {
+  const captureStreakImage = async () => {
+    if (!streakRef.current) return null
+    
+    try {
+      const canvas = await html2canvas(streakRef.current, {
+        backgroundColor: '#13131a',
+        scale: 2,
+        logging: false,
+      })
+      return canvas.toDataURL('image/png')
+    } catch (error) {
+      console.error('Error capturing streak image:', error)
+      return null
+    }
+  }
+
+  const handleShare = async () => {
+    const imageData = await captureStreakImage()
     onShare('streak', {
       currentStreak: streak,
-      longestStreak: longestStreak
+      longestStreak: longestStreak,
+      imageData: imageData
     })
   }
 
   return (
     <motion.div
+      ref={streakRef}
       className="streak-display"
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}

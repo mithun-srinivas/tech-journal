@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Twitter, Linkedin, Facebook, Link2, Check } from 'lucide-react'
+import { X, Twitter, Linkedin, Facebook, Link2, Check, Download } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import './ShareModal.css'
@@ -18,14 +18,32 @@ function ShareModal({ isOpen, onClose, data }) {
     return ''
   }
 
+  const generateShareUrl = () => {
+    if (data.type === 'project') {
+      // Generate permalink for project
+      return `${window.location.origin}/project/${data.data.id}`
+    }
+    return window.location.origin
+  }
+
   const shareText = generateShareText()
-  const shareUrl = window.location.origin
+  const shareUrl = generateShareUrl()
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`)
     setCopied(true)
     toast.success('Copied to clipboard!')
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const downloadImage = () => {
+    if (data.type === 'streak' && data.data.imageData) {
+      const link = document.createElement('a')
+      link.download = `techjournal-streak-${data.data.currentStreak}-days.png`
+      link.href = data.data.imageData
+      link.click()
+      toast.success('Image downloaded!')
+    }
   }
 
   const shareToTwitter = () => {
@@ -61,7 +79,9 @@ function ShareModal({ isOpen, onClose, data }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="share-header">
-              <h2>Share Your Achievement 🎉</h2>
+              <h2>
+                {data.type === 'project' ? '🚀 Share Project' : 'Share Your Achievement 🎉'}
+              </h2>
               <button className="close-btn" onClick={onClose}>
                 <X size={20} />
               </button>
@@ -70,6 +90,33 @@ function ShareModal({ isOpen, onClose, data }) {
             <div className="share-preview">
               <p>{shareText}</p>
             </div>
+
+            {data.type === 'streak' && data.data.imageData && (
+              <div className="image-preview-box">
+                <label>Streak Image:</label>
+                <img 
+                  src={data.data.imageData} 
+                  alt="Streak" 
+                  className="streak-preview-image"
+                />
+                <button 
+                  className="btn btn-primary download-image-btn"
+                  onClick={downloadImage}
+                >
+                  <Download size={18} />
+                  Download Image
+                </button>
+              </div>
+            )}
+
+            {data.type === 'project' && (
+              <div className="permalink-box">
+                <label>Public Permalink:</label>
+                <div className="permalink-url">
+                  <code>{shareUrl}</code>
+                </div>
+              </div>
+            )}
 
             <div className="share-buttons">
               <button className="share-btn twitter" onClick={shareToTwitter}>

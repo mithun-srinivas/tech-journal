@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import AdminDashboard from './pages/AdminDashboard'
+import PublicProject from './pages/PublicProject'
 import './App.css'
 
 // Check if Supabase is configured
@@ -105,6 +106,7 @@ function App() {
           />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/project/:projectId" element={<PublicProject />} />
             <Route
               path="/dashboard"
               element={
