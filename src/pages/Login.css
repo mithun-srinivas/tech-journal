@@ -175,18 +175,3 @@
   color: var(--accent-orange-light);
   text-decoration: underline;
 }
-
-.admin-hint {
-  margin-top: 2rem;
-  padding: 1rem;
-  background: rgba(255, 107, 53, 0.1);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.admin-hint p {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin: 0;
-}
-

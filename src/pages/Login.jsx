@@ -90,7 +90,7 @@ function Login() {
               className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={isSignUp ? "Enter your email" : "admin or your email"}
+              placeholder={isSignUp ? "Enter your email" : "Enter your email or username"}
               required
             />
           </div>
@@ -135,10 +135,6 @@ function Login() {
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>
           </p>
-        </div>
-
-        <div className="admin-hint">
-          <p>💡 Default admin: username "admin", password "admin"</p>
         </div>
       </motion.div>
     </div>
