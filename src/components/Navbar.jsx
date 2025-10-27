@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
@@ -7,10 +8,21 @@ import './Navbar.css'
 function Navbar({ isAdmin = false }) {
   const { signOut, profile } = useAuth()
   const navigate = useNavigate()
+  const [signingOut, setSigningOut] = useState(false)
 
   const handleSignOut = async () => {
-    await signOut()
-    navigate('/login')
+    setSigningOut(true)
+    try {
+      const success = await signOut()
+      if (success) {
+        // Small delay to ensure state is cleared
+        setTimeout(() => {
+          navigate('/login', { replace: true })
+        }, 100)
+      }
+    } finally {
+      setSigningOut(false)
+    }
   }
 
   return (
@@ -47,9 +59,22 @@ function Navbar({ isAdmin = false }) {
             </Link>
           )}
 
-          <button onClick={handleSignOut} className="btn btn-secondary">
-            <LogOut size={18} />
-            Sign Out
+          <button 
+            onClick={handleSignOut} 
+            className="btn btn-secondary"
+            disabled={signingOut}
+          >
+            {signingOut ? (
+              <>
+                <span className="spinner-small"></span>
+                Signing Out...
+              </>
+            ) : (
+              <>
+                <LogOut size={18} />
+                Sign Out
+              </>
+            )}
           </button>
         </div>
       </div>

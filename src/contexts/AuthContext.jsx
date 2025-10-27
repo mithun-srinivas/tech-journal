@@ -71,12 +71,27 @@ export const AuthProvider = ({ children }) => {
             }
           }
         } else if (event === 'SIGNED_OUT') {
-          console.log('👋 User signed out')
+          console.log('👋 User signed out - clearing all state')
+          
+          // Clear all state
           setUser(null)
           setProfile(null)
           setIsAdmin(false)
           setLoading(false)
           shouldIgnoreSignedIn.current = false
+          
+          // Clear Redux store
+          store.dispatch(clearJournal())
+          store.dispatch(clearProjects())
+          store.dispatch(clearTips())
+          
+          // Clear localStorage
+          const keys = Object.keys(localStorage)
+          keys.forEach(key => {
+            if (key.startsWith('sb-')) {
+              localStorage.removeItem(key)
+            }
+          })
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('🔄 Token refreshed, updating user')
           // Just update the user object, don't re-fetch profile
@@ -175,6 +190,11 @@ export const AuthProvider = ({ children }) => {
       setUser(null)
       setProfile(null)
       setIsAdmin(false)
+      
+      // Clear Redux store
+      store.dispatch(clearJournal())
+      store.dispatch(clearProjects())
+      store.dispatch(clearTips())
       
       // Clear the bad session
       try {
@@ -302,17 +322,42 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      console.log('🚪 Signing out...')
       
-      // Clear Redux store
+      // Clear Redux store first
       store.dispatch(clearJournal())
       store.dispatch(clearProjects())
       store.dispatch(clearTips())
       
+      // Clear local state
+      setUser(null)
+      setProfile(null)
+      setIsAdmin(false)
+      setLoading(false)
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('❌ Error signing out:', error)
+        throw error
+      }
+      
+      // Clear all localStorage
+      const keys = Object.keys(localStorage)
+      keys.forEach(key => {
+        if (key.startsWith('sb-')) {
+          localStorage.removeItem(key)
+        }
+      })
+      
+      console.log('✅ Signed out successfully')
       toast.success('Signed out successfully')
+      
+      return true
     } catch (error) {
+      console.error('❌ Sign out failed:', error)
       toast.error(error.message)
+      return false
     }
   }
 

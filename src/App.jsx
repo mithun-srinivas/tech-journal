@@ -13,7 +13,7 @@ const isSupabaseConfigured = () => {
 }
 
 function PrivateRoute({ children, adminOnly = false }) {
-  const { user, loading, isAdmin } = useAuth()
+  const { user, loading, isAdmin, profile } = useAuth()
 
   if (loading) {
     return (
@@ -24,12 +24,12 @@ function PrivateRoute({ children, adminOnly = false }) {
     )
   }
 
-  if (!user) {
-    return <Navigate to="/login" />
+  if (!user || !profile) {
+    return <Navigate to="/login" replace />
   }
 
   if (adminOnly && !isAdmin) {
-    return <Navigate to="/dashboard" />
+    return <Navigate to="/dashboard" replace />
   }
 
   return children
