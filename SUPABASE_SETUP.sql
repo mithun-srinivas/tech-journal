@@ -183,6 +183,23 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+-- Function to enforce 5 project limit per user
+CREATE OR REPLACE FUNCTION check_project_limit()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Count existing projects for this user
+  IF (
+    SELECT COUNT(*) 
+    FROM projects 
+    WHERE user_id = NEW.user_id
+  ) >= 5 THEN
+    RAISE EXCEPTION 'User has reached the maximum limit of 5 projects';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 -- ============================================
 -- 6. CREATE TRIGGERS
 -- ============================================
@@ -210,6 +227,12 @@ CREATE TRIGGER update_daily_tips_updated_at
   BEFORE UPDATE ON daily_tips 
   FOR EACH ROW 
   EXECUTE PROCEDURE update_updated_at_column();
+
+-- Trigger to enforce project limit
+CREATE TRIGGER enforce_project_limit
+  BEFORE INSERT ON projects
+  FOR EACH ROW
+  EXECUTE PROCEDURE check_project_limit();
 
 -- ============================================
 -- 7. SETUP COMPLETE MESSAGE

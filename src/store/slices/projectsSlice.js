@@ -30,7 +30,13 @@ export const createProject = createAsyncThunk(
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Check if it's the project limit error
+        if (error.message?.includes('maximum limit of 5 projects')) {
+          throw new Error('Maximum of 5 projects allowed')
+        }
+        throw error
+      }
       return data
     } catch (error) {
       return rejectWithValue(error.message)

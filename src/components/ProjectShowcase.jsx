@@ -32,6 +32,12 @@ function ProjectShowcase({ onShare }) {
       return
     }
 
+    // Check project limit (5 projects max)
+    if (!editingProject && projects.length >= 5) {
+      toast.error('Maximum of 5 projects allowed. Delete a project to add a new one.')
+      return
+    }
+
     try {
       const techArray = formData.technologies
         .split(',')
@@ -116,14 +122,26 @@ function ProjectShowcase({ onShare }) {
       <div className="showcase-header">
         <div>
           <h2>My Projects 🚀</h2>
-          <p>Showcase your amazing work</p>
+          <p>Showcase your amazing work ({projects.length}/5 projects)</p>
+          {projects.length >= 4 && projects.length < 5 && (
+            <p style={{ color: 'var(--warning)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              ⚠️ {5 - projects.length} project slot remaining
+            </p>
+          )}
+          {projects.length >= 5 && (
+            <p style={{ color: 'var(--error)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              🚫 Project limit reached. Delete a project to add new ones.
+            </p>
+          )}
         </div>
         <button
           className="btn btn-primary"
           onClick={() => setShowModal(true)}
+          disabled={projects.length >= 5}
+          title={projects.length >= 5 ? 'Maximum of 5 projects reached' : 'Add new project'}
         >
           <Plus size={18} />
-          Add Project
+          {projects.length >= 5 ? 'Limit Reached' : 'Add Project'}
         </button>
       </div>
 
